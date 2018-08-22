@@ -120,7 +120,7 @@ describe('DELETE /todos/:id', () => {
                     return done(err);
                 
                 Todo.findById(todos[1]._id.toHexString()).then((todo) => {
-                    expect(todo).toBeNull();
+                    expect(todo).toBeFalsy();
                     done();
                 }).catch((e) => done());
             })
@@ -136,7 +136,7 @@ describe('DELETE /todos/:id', () => {
                     return done(err);
                 
                 Todo.findById(todos[1]._id.toHexString()).then((todo) => {
-                    expect(todo).not.toBeNull();
+                    expect(todo).toBeTruthy();
                     done();
                 }).catch((e) => done());
             })
@@ -175,7 +175,7 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
-                expect(res.body.todo.completed).toBeTruthy();
+                expect(res.body.todo.completed).toBe(true);
                 expect(typeof res.body.todo.completedAt).toBe('number');
             })
             .end(done);
@@ -210,8 +210,8 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
-                expect(res.body.todo.completed).toBeFalsy();
-                expect(res.body.todo.completedAt).toBeNull();
+                expect(res.body.todo.completed).toBe(false);
+                expect(res.body.todo.completedAt).toBeFalsy();
             })
             .end(done);
     });
@@ -308,8 +308,10 @@ describe('POST /users/login', () => {
                     return done(err);
                 
                 User.findById(users[1]._id).then((user) => {
-                    expect(user.tokens[1].access).toBe('auth');
-                    expect(user.tokens[1].token).toBe(res.headers['x-auth']);
+                    expect(user.toObject().tokens[1]).toMatchObject({
+                        access: 'auth',
+                        token: res.headers['x-auth']
+                    });
                     done();
                 }).catch((e) => {
                     done(e);
@@ -326,7 +328,7 @@ describe('POST /users/login', () => {
             })
             .expect(400)
             .expect((res) => {
-                expect(res.headers['x-auth']).not.toBeTruthy();
+                expect(res.headers['x-auth']).toBeFalsy();
             })
             .end((err, res) => {
                 if(err)
